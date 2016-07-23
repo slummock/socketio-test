@@ -1,19 +1,21 @@
-var express = require('express');
-var app = express();
-var server = require('http').createServer(app); 
-var io = require('socket.io')(server);
-
-server.listen(5555);
-
-app.use(express.static('public'));
+var app = require('express')();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
 app.get('/', function (req, res) {
-  res.sendfile(__dirname + '/index.html');
+    res.sendFile(__dirname + '/index.html');
 });
 
 io.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
+    console.log('a user connected');
+    socket.on('disconnect', function onDisconnect() {
+        console.log('user disconnected');
+    });
+    socket.on('chat message', function (msg) {
+        io.emit('chat message', msg);
+    });
+});
+
+http.listen(3000, function () {
+    console.log('listening on *:3000');
 });
